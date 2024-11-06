@@ -178,7 +178,7 @@ def plot(data, labels, events=[], export_path=None):
     if export_path:
         ax.get_figure().savefig(export_path)
 
-def plot_ticker(ticker, series, date_range = ('2019-11-01', None), events=[]):
+def plot_ticker(ticker, series, date_range = ('2019-11-01', None), events=[], plot_figure=True):
     """
     Fetches historical stock data for a specified ticker and date range, normalizes the data,
     and plots a specified series with optional event markers.
@@ -206,10 +206,16 @@ def plot_ticker(ticker, series, date_range = ('2019-11-01', None), events=[]):
 
     # Download ticker data from Yahoo! Finance
     start, end = date_range
-    df = yf.download(ticker, start=date_range[0], end=date_range[1], progress=False)
+    df = yf.download(ticker, start=start, end=end, progress=False)
 
     # Normalize fetched DataFrame
     df = normalize(df)
 
+    # Create a 'date' column in the DataFrame
+    df = create_date_column(df)
+
     # Plot specific series or list of series from DataFrame
-    plot(df[series], (df.index.name, series), events)
+    if plot_figure:
+        plot(df[series], (df.index.name, series), events)
+
+    return df
