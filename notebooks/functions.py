@@ -1,6 +1,14 @@
 import pandas as pd
 import seaborn as sns
 import yfinance as yf
+import plotly.express as px
+
+def load_ticker_data(ticker, date_range = ('2019-11-01', None)):
+    # Download ticker data from Yahoo! Finance
+    start, end = date_range
+    df = yf.download(ticker, start=date_range[0], end=date_range[1], progress=False)
+
+    return df
 
 def normalize(df):
     """
@@ -37,9 +45,100 @@ def normalize(df):
 
     # Normalize column index name, if it exists
     if result_df.columns.name is not None:
-        result_df.columns.name = result_df.columns.name.lower()
+        result_df.columns.name = None
 
     return result_df
+
+def create_date_column(df):
+    """
+    Creates a 'date' column in a DataFrame if not there already. If date was the index, reset the index to an integer.
+
+    Parameters:
+        df (pd.DataFrame): The DataFrame where the date column will be created
+
+    Returns:
+        result_df (pd.DataFrame): The updated DataFrame with the date column and integer index.
+    """
+    
+    result_df = df.copy()
+
+    #If the dataframe's index is a date, it needs to be put in a column
+    if isinstance(result_df.index, pd.DatetimeIndex) :
+        result_df['date'] = result_df.index.strftime("%Y-%m-%d")
+        result_df['date'] = pd.to_datetime(result_df['date'])
+        
+        
+    #If the index is not a date, just make sure date column has the same format.
+    else:
+        #result_df['date'] = result_df['date'].strftime("%Y-%m-%d")
+        result_df['date'] = pd.to_datetime(result_df['date'])
+        
+    #Reset the index     
+    result_df = result_df.reset_index(drop=True)
+    
+    return result_df
+
+def plot_plotly(data, title, x='date', y='adj_close', labels=('Date', 'Adjusted Closing Price')):
+    """
+    Plots an interactive line graph with optional event markers and export functionality.
+    
+    Parameters:
+        data (pd.DataFrame): The dataframe where the data to plot (e.g., closing prices) is.
+        x (str): The column name to be plotted on the x axis. By default, it is the date column.
+        y (str): The column name to be plotted on the y axis. By default, it is the adj_close column.
+        labels (tuple): A tuple containing two strings: 
+                        - labels[0]: The label for the x-axis (typically "Date").
+                        - labels[1]: The label for the y-axis (e.g., "Closing Price ($)").
+        title (str): Title of the graph to be plotted
+                                     
+    Returns:
+        None. Displays the plot and optionally saves it if export_path is provided.
+    """
+
+    # Plot graph from input data and labels
+    fig = px.line(data, x=x, y=y, labels={x : labels[0], y : labels[1]}, title=title)
+    fig.show()  
+
+def analysis_df(df, company, export=False):
+
+    result_df = df.copy()
+
+    #Calculate daily returns for this company
+    result_df['daily_returns'] = result_df.adj_close.pct_change() * 100
+
+    #Calculate monthly returns for this company
+    monthly_returns = result_df.resample('ME', on='date')['adj_close'].last().pct_change() * 100
+    result_df['monthly_returns'] = result_df['date'].map(monthly_returns)
+
+    #Calculate annual returns for this company
+    annual_returns = result_df.resample('YE', on='date')['adj_close'].last().pct_change() * 100
+    result_df['annual_returns'] = result_df['date'].map(annual_returns)
+
+    #Some data may be missing due to the fact that we calculte monthly/annual returns only once a month/year so we fill the month/year with the same value
+    result_df['daily_returns'] = result_df['daily_returns'].bfill()
+    result_df['monthly_returns'] = result_df['monthly_returns'].bfill()
+    result_df['annual_returns'] = result_df['annual_returns'].bfill()
+
+    #Calculate daily range
+    result_df['daily_range'] = result_df.high - result_df.low
+    
+    summary = {}
+
+    #Calculate mean and std of every column
+    for column in ['open', 'high', 'low', 'close', 'adj_close', 'volume', 'daily_returns', 
+                   'monthly_returns', 'annual_returns', 'daily_range']:
+        column_mean = round(result_df[column].mean(), 3)
+        column_std = round(result_df[column].std(), 3)
+        summary[column] = [column_mean, column_std]
+
+    #Create a DataFrame with the analysis we made
+    analysis_df = pd.DataFrame(summary, index=['mean', 'std'])
+
+    #If needed, export the DataFrame
+    if export == True:
+        analysis_df.to_csv(f'analysis_{company}.csv', index=False)
+    
+    return result_df, analysis_df
 
 def plot(data, labels, events=[], export_path=None):
     """
@@ -79,7 +178,7 @@ def plot(data, labels, events=[], export_path=None):
     if export_path:
         ax.get_figure().savefig(export_path)
 
-def plot_ticker(ticker, series, date_range, events=[]):
+def plot_ticker(ticker, series, date_range = ('2019-11-01', None), events=[]):
     """
     Fetches historical stock data for a specified ticker and date range, normalizes the data,
     and plots a specified series with optional event markers.
