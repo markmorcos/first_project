@@ -99,44 +99,42 @@ def plot_plotly(data, title, x='date', y='adj_close', labels=('Date', 'Adjusted 
     fig = px.line(data, x=x, y=y, labels={x : labels[0], y : labels[1]}, title=title)
     fig.show()  
 
+def monthly_and_annual_returns_stats(df):
+
+    result_df=df.copy()
+    # Calculate monthly returns using the last available 'adj_close' within each month
+    monthly_returns = result_df.set_index('date').resample("ME")['adj_close'].last().pct_change() * 100
+    annual_returns = result_df.set_index('date').resample("YE")['adj_close'].last().pct_change() * 100
+
+    mean_monthly_returns = monthly_returns.mean()
+    std_monthly_returns = monthly_returns.std()
+    mean_annual_returns = annual_returns.mean()
+    std_annual_returns = annual_returns.std()
+
+    return mean_monthly_returns, std_monthly_returns, mean_annual_returns, std_annual_returns
+
 def analysis_df(df, company, export=False):
 
     result_df = df.copy()
-
-    #Calculate daily returns for this company
-    result_df['daily_returns'] = result_df.adj_close.pct_change() * 100
-
-    #Calculate monthly returns for this company
-    monthly_returns = result_df.resample('ME', on='date')['adj_close'].last().pct_change() * 100
-    result_df['monthly_returns'] = result_df['date'].map(monthly_returns)
-
-    #Calculate annual returns for this company
-    annual_returns = result_df.resample('YE', on='date')['adj_close'].last().pct_change() * 100
-    result_df['annual_returns'] = result_df['date'].map(annual_returns)
-
-    #Some data may be missing due to the fact that we calculte monthly/annual returns only once a month/year so we fill the month/year with the same value
-    result_df['daily_returns'] = result_df['daily_returns'].bfill()
-    result_df['monthly_returns'] = result_df['monthly_returns'].bfill()
-    result_df['annual_returns'] = result_df['annual_returns'].bfill()
-
-    #Calculate daily range
-    result_df['daily_range'] = result_df.high - result_df.low
     
-    summary = {}
+    result_df['daily_returns'] = result_df.adj_close.pct_change() * 100
+    result_df['daily_returns'] = result_df['daily_returns'].bfill()
+    result_df['daily_range'] = result_df.high - result_df.low
 
-    #Calculate mean and std of every column
-    for column in ['open', 'high', 'low', 'close', 'adj_close', 'volume', 'daily_returns', 
-                   'monthly_returns', 'annual_returns', 'daily_range']:
+    summary = {}
+    
+    for column in ['open', 'high', 'low', 'close', 'adj_close', 'volume', 'daily_returns', 'daily_range']:
         column_mean = round(result_df[column].mean(), 3)
         column_std = round(result_df[column].std(), 3)
         summary[column] = [column_mean, column_std]
+    
+    summary['monthly_returns'] = [round(monthly_and_annual_returns_stats(result_df)[0], 3), round(monthly_and_annual_returns_stats(result_df)[1], 3)]
+    summary['annual_returns'] = [round(monthly_and_annual_returns_stats(result_df)[2], 3), round(monthly_and_annual_returns_stats(result_df)[3], 3)]
 
-    #Create a DataFrame with the analysis we made
     analysis_df = pd.DataFrame(summary, index=['mean', 'std'])
 
-    #If needed, export the DataFrame
-    if export == True:
-        analysis_df.to_csv(f'analysis_{company}.csv', index=False)
+    if export:
+        analysis_df.to_csv(f'../data/clean/analysis_{company}', index=False)
     
     return result_df, analysis_df
 
