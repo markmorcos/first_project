@@ -134,7 +134,7 @@ def analysis_df(df, company, export=False):
     analysis_df = pd.DataFrame(summary, index=['mean', 'std'])
 
     if export:
-        analysis_df.to_csv(f'../data/clean/analysis_{company}', index=False)
+        analysis_df.to_csv(f'../data/clean/analysis_{company}.csv', index=False)
     
     return result_df, analysis_df
 
