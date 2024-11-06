@@ -9,7 +9,7 @@ The analysis focuses on understanding how different industries respond to econom
 The stock prices of technology companies are more volatile than those of financial companies, leading to larger price swings over time.
 
 **Hypothesis 2**:
-Major economic events, such as interest rate changes or inflation reports, lead to significant fluctuations in JPMorgan Chase’s stock price.
+Major economic events, such as interest rate changes or inflation reports, lead to significant fluctuations in stock price.
 
 Through this exploration, the project aims to provide valuable insights into the dynamics of stock prices, offering a clearer picture of how external factors drive market behavior in different sectors.
 
@@ -70,30 +70,57 @@ uv pip install -r requirements.txt
 Pandas, Numpy, Seaborn, Matplotlib.pyplo, plotly.express, yfinance 
 
 # Dataset 
-
-## Data cleaning and analysis functions
-......
-
-## Data visualization functions
-.....
+Yahoo Finance API was used as main data source, supplemented by additional datasets from Kaggle to enrich analysis. All datasets consist of financial statements and are often used to model company valuations and performance.
 
 ## Main dataset issues
 
-- ...
-- ...
-- ...
+- Data sourced from different resuorces.
+- Required formatting and cleaning for consistency.
+- Some entries needed adjustments for proper structure.
 
 ## Solutions for the dataset issues
-...
+
+The data was standardized, cleaned, and transformed to ensure consistency across sources and to fit the required formatting in order to use same functions
+
+# Questions
+
+- Are stock prices of technology companies more volatile than those of financial companies, leading to larger price swings over time?
+- Do major economic events, such as interest rate changes or inflation reports, lead to significant fluctuations in stock price?
 
 
+# Methodology
 
-## Slides
+The analysis used stock price data from November 2019 to November 2024, focusing on daily, monthly, and annual trends. Data was cleaned by standardizing dates, aligning column names, and handling missing values. Then the data was analysed for trends, volatility, and patterns over time, using statistical measures such as mean and standard deviation. 
 
-https://docs.google.com/presentation/d/1pIAcE5RoUORcY9Z3HZl6_fNK113R7y5pWrNVE4h4qxY/edit?usp=sharing
+Finally, the data was visualised using charts to highlight important trends and anomalies, ultimately generating insights into the stock's performance over the 5-year period.
 
 # Conclusion
 
 One of the key findings from the analysis was that volume raised exponentially during periods of high uncertainty, particularly during the onset of the Covid-19 pandemic and in response to significant interest rate decisions. This surge in trading volume aligns with increased market volatility and can be attributed to heightened investor fear and speculation.
 
 In conclusion, this analysis not only confirms the hypotheses but also highlights the complex interplay between sector-specific characteristics, economic events, and market volatility.
+
+# Further questions
+....
+
+# Links to data sources and Trello
+
+## Slides
+
+https://docs.google.com/presentation/d/1pIAcE5RoUORcY9Z3HZl6_fNK113R7y5pWrNVE4h4qxY/edit?usp=sharing
+
+## Trello
+
+https://trello.com/b/hyu8KwSF/stock-market-analysis
+
+## Data sources
+
+https://finance.yahoo.com/quote/ENSG/history/
+https://www.kaggle.com/datasets/kapturovalexander/goldman-sachs-and-jpmorgan-chase-share-prices
+https://finance.yahoo.com/quote/NVDA/
+https://finance.yahoo.com/quote/MSFT/
+https://finance.yahoo.com/quote/GOOG/
+https://finance.yahoo.com/quote/AMZN/
+https://finance.yahoo.com/quote/NFLX/
+https://finance.yahoo.com/quote/AAPL/
+https://finance.yahoo.com/quote/META/
