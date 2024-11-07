@@ -69,7 +69,7 @@ If you're a Windows user type:
 uv pip install -r requirements.txt
 ```
 
-## Required packeges
+## Required packages
 Pandas, Numpy, Seaborn, Matplotlib.pyplo, plotly.express, plotly.graph_objects, yfinance 
 
 </details>
