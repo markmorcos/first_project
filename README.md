@@ -79,7 +79,7 @@ Yahoo Finance API was used as main data source, supplemented by additional resea
 
 ## Main dataset issues
 
-- Data sourced from different resuorces
+- Data sourced from different resources
 - Required formatting and cleaning for consistency.
 - Some entries needed adjustments for proper structure.
 
